@@ -1,12 +1,20 @@
-var amqp = require('amqplib-easy')('amqp://guest:guest@localhost:5672');
+const amqp = require('amqplib-easy')('amqp://guest:guest@localhost:5672');
+var count = 0;
 
 amqp.consume(
     {
-        // exchange: 'amq.direct',
+        exchange: 'test-exchange',
         queue: 'test-queue',
-        topics: [ '.*' ]
+        topics: [ '.*' ],
+        parse: function (msg) { JSON.stringify(msg) }
     },
     function (msg) {
-        console.log('msg: ', msg);
+        count += 1;
+        if (count % 1024 === 0) {
+            console.log('msg count: ', count);
+        }
     }
+    // NOTE: adding this will increase consume performance, but be sure
+    // to understand the implications
+    //, { noAck: true}
 );
